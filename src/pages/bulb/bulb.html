@@ -1,0 +1,72 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Bulb Config
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-fab top right edge>
+    <button ion-fab mini (click)="addABulb()">
+      <ion-icon *ngIf="!add" name="add"></ion-icon>
+      <ion-icon *ngIf="add" name="close"></ion-icon>
+    </button>
+  </ion-fab>
+
+  <ion-list *ngIf="add">
+
+    <ion-item>
+      <ion-label fixed>Bulb name</ion-label>
+      <ion-input type="text" [(ngModel)]="bulbName"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label fixed>Bulb id</ion-label>
+      <ion-input type="number" [(ngModel)]="bulbId"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label fixed>Bulb description</ion-label>
+      <ion-input type="text" [(ngModel)]="bulbData"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <button padding-vertical ion-button block (click)="addBulb()">
+        Add Bulb
+      </button>
+    </ion-item>
+
+  </ion-list>
+
+  <ion-list>
+    <ion-item>
+      <button padding-vertical ion-button block (click)="getBulbs()">
+        Get current data
+      </button>
+    </ion-item>
+
+    <ion-item>
+      <button padding-vertical ion-button block (click)="addNewBulb()">
+        Add Bulb to the system
+      </button>
+    </ion-item>
+
+    <!-- <ion-item *ngFor="let bulb of bulbKeys">
+      <ion-label>{{bulb}}</ion-label>
+    </ion-item> -->
+
+    <button ion-item *ngFor="let bulb of bulbs" (click)="getBulbs()">
+      {{bulb.bulbName}} -({{bulb.bulbId}})
+    </button>
+  </ion-list>
+
+  <!-- <div padding>
+    <p [innerHTML]="status"></p>
+  </div> -->
+  <hr>
+  <hr>
+  <div padding>
+    {{object|json}}
+  </div>
+</ion-content>

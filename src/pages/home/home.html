@@ -1,0 +1,34 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Home
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-list>
+
+    <ion-item>
+      <p>Create Hotspot &amp; configure new bulb:</p>
+      <button padding-vertical ion-button block [navPush]="pushHotspotPage()">
+        Create Hotspot
+      </button>
+    </ion-item>
+
+    <ion-item>
+      <p>Connect to Wi-Fi Access Point &amp; make system changes:</p>
+      <button padding-vertical ion-button block [navPush]="pushWiFiPage()">
+        Connect to Wi-Fi Access Point
+      </button>
+    </ion-item>
+
+    <ion-item>
+      <p>Add/Remove Bulb details:</p>
+      <button padding-vertical ion-button block [navPush]="pushBulbPage()">
+        Add/Remove Bulb
+      </button>
+    </ion-item>
+
+  </ion-list>
+</ion-content>

@@ -1,0 +1,58 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Create Hotspot
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-list>
+
+    <ion-item>
+      <ion-label fixed>SSID</ion-label>
+      <ion-input type="text" [(ngModel)]="ssid"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Mode</ion-label>
+      <ion-select [(ngModel)]="mode">
+        <ion-option value="Open">Open</ion-option>
+        <ion-option value="WEP">WEP</ion-option>
+        <ion-option value="WPA">WPA</ion-option>
+        <ion-option value="WPA_PSK">WPA_PSK</ion-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item *ngIf="mode!='Open'">
+      <ion-label fixed>Password</ion-label>
+      <ion-input type="password" [(ngModel)]="password"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <button padding-vertical ion-button block (click)="createHotspot()">
+        Create
+      </button>
+    </ion-item>
+
+    <ion-item>
+      <button padding-vertical ion-button block (click)="getData()">
+        Get current data
+      </button>
+    </ion-item>
+
+  </ion-list>
+
+  <ion-list>
+    <ion-item *ngFor="let bulb of bulbs">
+      <ion-label>SSID</ion-label>
+      <button padding-vertical ion-button block (click)="getData()">
+        Get current data
+      </button>
+    </ion-item>
+  </ion-list>
+
+  <div padding>
+    <p [innerHTML]="status"></p>
+  </div>
+</ion-content>

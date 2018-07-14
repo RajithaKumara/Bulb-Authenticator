@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Connect to Wi-Fi AP
+    </ion-title>
+    <ion-buttons end>
+      <ion-toggle end [(ngModel)]="wifi"></ion-toggle>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-list>
+
+    <ion-item>
+      <ion-label fixed>SSID</ion-label>
+      <ion-input type="text" [(ngModel)]="ssid"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label fixed>Password</ion-label>
+      <ion-input type="password" [(ngModel)]="password"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label fixed>Host IP</ion-label>
+      <ion-input type="text" [(ngModel)]="ip"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <button padding-vertical ion-button block (click)="connectToWifi()">
+        connect
+      </button>
+    </ion-item>
+
+    <ion-item>
+      <button padding-vertical ion-button block (click)="getDetails()">
+        Get current data
+      </button>
+    </ion-item>
+
+  </ion-list>
+
+  <ion-list >
+    <ion-item>
+      <ion-label>Intensity Save Mode</ion-label>
+      <ion-toggle end [(ngModel)]="saveMode"></ion-toggle>
+    </ion-item>
+
+    <ion-item *ngFor="let bulb of bulbs">
+      <ion-card>
+
+        <ion-card-header>
+          {{bulb.id}} - {{bulb.state|bulbState}}
+        </ion-card-header>
+
+        <ion-card-content>
+          <button padding-vertical ion-button block (click)="getData()">
+            Set off Intensity
+          </button>
+        </ion-card-content>
+
+      </ion-card>
+
+      <!-- <ion-label>{{bulb.id}}
+        <button padding-vertical end ion-button (click)="getData()">
+          Set on Intensity
+        </button>
+        <button padding-vertical end ion-button (click)="getData()">
+          Set off Intensity
+        </button>
+      </ion-label> -->
+    </ion-item>
+  </ion-list>
+
+
+  <div padding>
+    <p [innerHTML]="status"></p>
+  </div>
+  <div padding>
+    {{object|json}}
+  </div>
+</ion-content>
