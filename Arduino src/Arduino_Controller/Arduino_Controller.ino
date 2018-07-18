@@ -119,7 +119,7 @@ String getAllDetails() {
     json += "\"}";
   }
   json += "]";
-  return json;
+  serialSuccessHandler(json);
 }
 
 /**
@@ -148,14 +148,18 @@ Bulb findById(uint8_t bulbID) {
   }
 }
 
+/**
+ * Handle serial comm with wifi module
+ */
 void handleSerial() {
   char requestChar = SoftSerial.read();
 
   if (requestChar == 'a') { //Detect first request with 'a'
     String payload = "";
+    bool isTimeout = true;
 
     time = millis();
-    while (millis() - time < 1000) { //Collect char values
+    while (millis() - time < 50) { //Collect char values
       requestChar = SoftSerial.read();
 
       if (requestChar == 'a') {
@@ -164,53 +168,148 @@ void handleSerial() {
       } else if (requestChar == 's') {
         payload = "";
       } else if (requestChar == '\n') {
+        isTimeout = false;
         break;
       }
       payload += requestChar ;
     }
-
-    functionHandler(payload);
+    if (isTimeout) {
+      serialErrorHandler(1);//Error code 1 for timeout
+    } else {
+      functionHandler(payload);
+    }
   }
 }
 
+/**
+ * Navigate to functions
+ */
 void functionHandler(String payload) {
   String function = payload.substring(1, 5);
+  String variableStr = payload.substring(6, payload.length());
 
   Serial.println("##########################################");
   Serial.println(payload);
   Serial.println(function);
+  Serial.println(variableStr);
   Serial.println("##########################################");
+
+  uint8_t count = 1;
+  int variables[] = {};
+  String tempVal = "";
+  uint8_t index = variableStr.indexOf(',');
+
+  time = millis();
+  while (!(index == 255) && millis() - time < 10) {
+    if ((count % 2) == 1) {
+      tempVal = variableStr.substring(0, index);
+    } else {
+      if (tempVal == variableStr.substring(0, index)) {
+        variables[count / 2] = tempVal.toInt();
+      } else {
+        serialErrorHandler(2);//error code 2 for error in variables
+        break;
+      }
+    }
+    variableStr = variableStr.substring(index + 1, variableStr.length());
+    count += 1;
+    index = variableStr.indexOf(',');
+  }
+  variables[0] = count / 2;
 
   switch (function.toInt()) {
     case 1111:
       //addBulb
-      Serial.println("Add bulb");
+      if (variables[0] == 1) {
+        addBulb(variables[1]);
+      } else {
+        serialErrorHandler(4);//error code 4 for invalid variable count
+      }
       break;
     case 2222:
       //addBulb
+      if (variables[0] == 3) {
+        addBulb(variables[1]);
+      } else {
+        serialErrorHandler(4);//error code 4 for invalid variable count
+      }
       break;
     case 3333:
       //removeBulb
+      if (variables[0] == 1) {
+        removeBulb(variables[1]);
+      } else {
+        serialErrorHandler(4);//error code 4 for invalid variable count
+      }
       break;
     case 4444:
       //changeBulbState
+      if (variables[0] == 2) {
+        changeBulbState(variables[1], variables[2]);
+      } else {
+        serialErrorHandler(4);//error code 4 for invalid variable count
+      }
       break;
     case 5555:
       //getBulbState
+      if (variables[0] == 1) {
+        getBulbState(variables[1]);
+      } else {
+        serialErrorHandler(4);//error code 4 for invalid variable count
+      }
       break;
     case 6666:
       //getAllDetails
+      if (variables[0] == 0) {
+        getAllDetails();
+      } else {
+        serialErrorHandler(4);//error code 4 for invalid variable count
+      }
       break;
     case 7777:
       //setBulbIntensity
+      if (variables[0] == 2) {
+        setBulbIntensity(variables[1],intensity,variables[2]);
+      } else {
+        serialErrorHandler(4);//error code 4 for invalid variable count
+      }
       break;
     default:
-      serialErrorHandler();
+      serialErrorHandler(3);//error code 3 for invalid payload
   }
 }
 
-void serialErrorHandler() {
-  Serial.println("Error...");
+/**
+ * Serial comm error handling
+ */
+void serialErrorHandler(uint8_t code) {
+  switch (code) {
+    case 1:
+      //Error code 1 for timeout
+      Serial.println("Time Out...");
+      break;
+    case 2:
+      //Error code 2 for error in variables
+      Serial.println("Error in variables");
+      break;
+    case 3:
+      //Error code 3 for invalid payload
+      Serial.println("Invalid_payload...");
+      break;
+    case 4:
+      //Error code 4 for invalid variable count
+      Serial.println("Invalid variable count");
+      break;
+    default:
+      Serial.println("Default Error...");
+  }
+}
+
+/**
+ * Serial comm success handling
+ */
+void serialSuccessHandler(String payload) {
+  Serial.println("Success...  :" + payload);
 }
 
 
