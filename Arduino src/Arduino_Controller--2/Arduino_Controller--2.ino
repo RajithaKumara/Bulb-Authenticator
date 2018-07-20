@@ -27,7 +27,7 @@ void loop() {
 
   Serial.println("reading intensity");
   Serial.println(intensity);
-  delay(50);
+  delay(500);
   intensity += 1; //assign intensity value
   Serial.println("finished reading intensity");
 }
@@ -45,6 +45,7 @@ void addBulb(uint8_t id) {
   Bulb bulb = {id, 0, 0, false};
   bulbs[bulbCount] = bulb;
   bulbCount += 1;
+  serialSuccessHandler("");
 }
 
 /**
@@ -55,6 +56,7 @@ void addBulb(uint8_t id, int intensityOn, int intensityOff) {
   Bulb bulb = {id, intensityOn, intensityOn, false};
   bulbs[bulbCount] = bulb;
   bulbCount += 1;
+  serialSuccessHandler("");
 }
 
 /**
@@ -76,6 +78,7 @@ void removeBulb(uint8_t bulbID) {
     bulbs[j] = newBulbs[j];
   }
   bulbCount = count;
+  serialSuccessHandler("");
 }
 
 /**
@@ -89,6 +92,7 @@ void changeBulbState(uint8_t bulbID, bool state) {
       bulb.state = state;
     }
   }
+  serialSuccessHandler("");
 }
 
 /**
@@ -97,7 +101,7 @@ void changeBulbState(uint8_t bulbID, bool state) {
 */
 bool getBulbState(uint8_t bulbID) {
   Bulb bulb = findById(bulbID);
-  return bulb.state;
+  serialSuccessHandler("" + bulb.state);
 }
 
 /**
@@ -110,11 +114,11 @@ String getAllDetails() {
     Bulb bulb = bulbs[i];
     json += "{\"id\":\"";
     json += bulb.id;
-    json += "\",\"intensityOn\":\"";
+    json += "\",\"iOn\":\"";
     json += bulb.intensityOn;
-    json += "\",\"intensityOff\":\"";
+    json += "\",\"iOff\":\"";
     json += bulb.intensityOff;
-    json += "\",\"state\":\"";
+    json += "\",\"onOff\":\"";
     json += bulb.state;
     json += "\"}";
   }
@@ -137,6 +141,7 @@ void setBulbIntensity(uint8_t bulbID, int intensity, bool onOff) {
       }
     }
   }
+  serialSuccessHandler("");
 }
 
 Bulb findById(uint8_t bulbID) {
@@ -149,8 +154,8 @@ Bulb findById(uint8_t bulbID) {
 }
 
 /**
- * Handle serial comm with wifi module
- */
+   Handle serial comm with wifi module
+*/
 void handleSerial() {
   char requestChar = SoftSerial.read();
 
@@ -182,17 +187,11 @@ void handleSerial() {
 }
 
 /**
- * Navigate to functions
- */
+   Navigate to functions
+*/
 void functionHandler(String payload) {
   String function = payload.substring(1, 5);
   String variableStr = payload.substring(6, payload.length());
-
-  Serial.println("##########################################");
-  Serial.println(payload);
-  Serial.println(function);
-  Serial.println(variableStr);
-  Serial.println("##########################################");
 
   uint8_t count = 1;
   int variables[] = {};
@@ -269,47 +268,47 @@ void functionHandler(String payload) {
     case 7777:
       //setBulbIntensity
       if (variables[0] == 2) {
-        setBulbIntensity(variables[1],intensity,variables[2]);
+        setBulbIntensity(variables[1], intensity, variables[2]);
       } else {
         serialErrorHandler(4);//error code 4 for invalid variable count
       }
       break;
     default:
-      serialErrorHandler(3);//error code 3 for invalid payload
+      serialErrorHandler(3);//error code 3 for error in function code
   }
 }
 
 /**
- * Serial comm error handling
- */
+   Serial comm error handling
+
+   Error code 1 for timeout
+   Error code 2 for error in variables
+   Error code 3 for error in function code
+   Error code 4 for invalid variable count
+*/
 void serialErrorHandler(uint8_t code) {
-  switch (code) {
-    case 1:
-      //Error code 1 for timeout
-      Serial.println("Time Out...");
-      break;
-    case 2:
-      //Error code 2 for error in variables
-      Serial.println("Error in variables");
-      break;
-    case 3:
-      //Error code 3 for invalid payload
-      Serial.println("Invalid_payload...");
-      break;
-    case 4:
-      //Error code 4 for invalid variable count
-      Serial.println("Invalid variable count");
-      break;
-    default:
-      Serial.println("Default Error...");
+  String err = "eeee";
+  for (uint8_t i = 0; i < 4; i++) {
+    err += code;
+  }
+  
+  char responceChar = '0';
+  time = millis();
+  while (millis() - time < 10 && !(responceChar == 'r')) { //Write error code until get responce
+    SoftSerial.println(err);
+    SoftSerial.println("\n\n");
+    responceChar = SoftSerial.read();
   }
 }
 
 /**
- * Serial comm success handling
- */
+   Serial comm success handling
+*/
 void serialSuccessHandler(String payload) {
-  Serial.println("Success...  :" + payload);
+  SoftSerial.print("ssss");
+  for (uint8_t i = 0; i < 4; i++) {
+    SoftSerial.println(payload);
+    SoftSerial.println("\n\n");
+  }
+
 }
-
-

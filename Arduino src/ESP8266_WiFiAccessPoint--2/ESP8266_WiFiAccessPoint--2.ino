@@ -4,6 +4,7 @@
 
 const char *ssid = "Default";
 const char *password = "12345678";
+unsigned long _time;
 
 ESP8266WebServer server(80);
 
@@ -38,56 +39,72 @@ void loop() {
    addBulb(uint8_t id)
    Code 1111
 */
-void addBulb(uint8_t id) {
-  String payload = "ssss1111,";
+String addBulb(uint8_t id) {
+  String payload = "1111,";
   payload += id;
-  handleSerial(payload);
+  payload += ",";
+  payload += id;
+  return handleSerial(payload);
 }
 
 /**
    addBulb(uint8_t id, int intensityOn, int intensityOff)
    Code 2222
 */
-void addBulb(uint8_t id, int intensityOn, int intensityOff) {
-  String payload = "ssss2222,";
+String addBulb(uint8_t id, int intensityOn, int intensityOff) {
+  String payload = "2222,";
+  payload += id;
+  payload += ",";
   payload += id;
   payload += ",";
   payload += intensityOn;
   payload += ",";
+  payload += intensityOn;
+  payload += ",";
   payload += intensityOff;
-  handleSerial(payload);
+  payload += ",";
+  payload += intensityOff;
+  return handleSerial(payload);
 }
 
 /**
    removeBulb(uint8_t bulbID)
    Code 3333
 */
-void removeBulb(uint8_t id) {
-  String payload = "ssss3333,";
+String removeBulb(uint8_t id) {
+  String payload = "3333,";
   payload += id;
-  handleSerial(payload);
+  payload += ",";
+  payload += id;
+  return handleSerial(payload);
 }
 
 /**
    changeBulbState(uint8_t bulbID, bool state)
    Code 4444
 */
-void changeBulbState(uint8_t id, bool state) {
-  String payload = "ssss4444,";
+String changeBulbState(uint8_t id, bool state) {
+  String payload = "4444,";
+  payload += id;
+  payload += ",";
   payload += id;
   payload += ",";
   payload += state;
-  handleSerial(payload);
+  payload += ",";
+  payload += state;
+  return handleSerial(payload);
 }
 
 /**
    getBulbState(uint8_t bulbID)
    Code 5555
 */
-bool getBulbState(uint8_t id) {
-  String payload = "ssss5555,";
+String getBulbState(uint8_t id) {
+  String payload = "5555,";
   payload += id;
-  handleSerial(payload);
+  payload += ",";
+  payload += id;
+  return handleSerial(payload);
 }
 
 /**
@@ -95,46 +112,75 @@ bool getBulbState(uint8_t id) {
    Code 6666
 */
 String getAllDetails() {
-  String payload = "ssss6666";
-  handleSerial(payload);
+  String payload = "6666";
+  return handleSerial(payload);
 }
 
 /**
    setBulbIntensity(uint8_t bulbID, int intensity, bool onOff)
    Code 7777
 */
-void setBulbIntensity(uint8_t id, int intensity, bool onOff) {
-  String payload = "ssss7777,";
+String setBulbIntensity(uint8_t id, int intensity, bool onOff) {
+  String payload = "7777,";
+  payload += id;
+  payload += ",";
   payload += id;
   payload += ",";
   payload += intensity;
   payload += ",";
+  payload += intensity;
+  payload += ",";
   payload += onOff;
-  handleSerial(payload);
-}
-
-Bulb findById(uint8_t bulbID) {
-  for (int i = 0; i < bulbCount; i++) {
-    Bulb bulb = bulbs[i];
-    if (bulb.id == bulbID) {
-      return bulb;
-    }
-  }
+  payload += ",";
+  payload += onOff;
+  return handleSerial(payload);
 }
 
 /**
    Send 'a' until get responce 'b'
+   After send the payload
 */
-void handleSerial(String payload) {
-  while (true){
-    Serial.print('a');
-    char responceChar = Serial.read();
-    if (responceChar == 'b') {
-      Serial.println(payload);
-      Serial.println("\n\n");
-      break;
-    }else{
-      delay(1);
+String handleSerial(String payload) {
+  bool isTimeout = true;
+  bool isSent = false;
+  uint8_t isSuccess = 0;
+  String result = "";
+  _time = millis();
+  while (millis() - _time < 1000) { //Set 1 second timeout
+    if (!isSent) {
+      Serial.print('a');
+      char responceChar = Serial.read();
+      if (responceChar == 'b') {
+        Serial.print("ssss");
+        Serial.println(payload);
+        Serial.println("\n\n");
+        isSent = true;
+      } else {
+        delay(1);
+      }
+    } else {
+      char responceChar = Serial.read();
+      if (responceChar == 'e') {
+        isSuccess -= 1;
+        result = "";
+      } else if (responceChar == 's') {
+        isSuccess += 1;
+        result = "";
+      } else if (responceChar == '\n') {
+        Serial.print("rrrr");
+        break;
+      } else {
+        result += responceChar;
+      }
+    }
+  }
+  if (isTimeout) {
+    return "{\"res\":\"T\"}";
+  } else {
+    if (isSuccess > 0) {
+      return "{\"res\":\"S\",\"data\":\"" + result + "\"}";
+    } else {
+      return "{\"res\":\"E\",\"data\":\"" + result + "\"}";
     }
   }
 }
@@ -168,13 +214,14 @@ void handleAddBulb() {
     }
   }
 
+  String res = "";
   if (count == 1) {
-    addBulb(id.toInt());
-  } else if (count == 2) {
-    addBulb(id.toInt(), intensityOn.toInt(), intensityOff.toInt());
+    res = addBulb(id.toInt());
+  } else if (count == 3) {
+    res = addBulb(id.toInt(), intensityOn.toInt(), intensityOff.toInt());
   }
 
-  server.send ( 200, "application/json", "{\"res\":\"OK\"}" );
+  server.send ( 200, "application/json", res );
 }
 
 void handleRemoveBulb() {
@@ -184,9 +231,9 @@ void handleRemoveBulb() {
       id = server.arg ( i );
     }
   }
-  removeBulb(id.toInt());
+  String res = removeBulb(id.toInt());
 
-  server.send ( 200, "application/json", "{\"res\":\"OK\"}" );
+  server.send ( 200, "application/json", res );
 }
 
 void handleChangeBulbState() {
@@ -201,9 +248,9 @@ void handleChangeBulbState() {
       }
     }
   }
-  changeBulbState(id.toInt(), state);
+  String res = changeBulbState(id.toInt(), state);
 
-  server.send ( 200, "application/json", "{\"res\":\"OK\"}" );
+  server.send ( 200, "application/json", res );
 }
 
 void handleGetBulbState() {
@@ -213,10 +260,7 @@ void handleGetBulbState() {
       id = server.arg ( i );
     }
   }
-  bool state = getBulbState(id.toInt());
-  String res = "{\"res\":\"";
-  res += state;
-  res += "\"}";
+  String res = getBulbState(id.toInt());
 
   server.send ( 200, "application/json", res );
 }
@@ -236,9 +280,9 @@ void handleSetIntensity() {
       }
     }
   }
-  setBulbIntensity(id.toInt(), intensity.toInt(), onOff);
+  String res = setBulbIntensity(id.toInt(), intensity.toInt(), onOff);
 
-  server.send ( 200, "application/json", "{\"res\":\"OK\"}" );
+  server.send ( 200, "application/json", res );
 }
 
 void handleGetDetails() {
