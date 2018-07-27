@@ -14,6 +14,7 @@ struct Bulb {
 uint8_t bulbCount = 0;
 Bulb bulbs[] = {};
 int startAddress = 6; //This is start address of EEPROM
+const int eeprom_length = 512;
 
 ESP8266WebServer server(80);
 
@@ -21,9 +22,17 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   delay(1000);
   Serial.begin(115200);
-  //  EEPROM.begin(512);
+  EEPROM.begin(eeprom_length);
   //  byte len = EEPROM.length();
-  getFromRom(); //load bulb data from ROM
+
+  uint8_t isFirstLoad = EEPROM.read(0);
+  if (isFirstLoad == 1) { //not first loading
+    bulbCount = EEPROM.read(1); //load bulb data from ROM
+  } else { //if first time
+    EEPROM.write(0, 1);
+    EEPROM.commit();
+    Serial.println("firsttime");
+  }
 
   WiFi.softAP(ssid, password);
 
@@ -40,9 +49,7 @@ void setup() {
 
 void loop() {
   server.handleClient();
-  //  delay(1);
 }
-
 
 
 /**
@@ -50,20 +57,14 @@ void loop() {
 */
 void addBulb(uint8_t id) {
   Bulb bulb = {id, 0, 0, false};
-  bulbs[bulbCount] = bulb;
+  saveToRom(bulb);
   bulbCount += 1;
-
-  saveToRom(); //save to rom
 }
 
-void addBulb(uint8_t id, int intensityOn, int intensityOff, bool state, bool bySys) {
+void addBulb(uint8_t id, int intensityOn, int intensityOff, bool state) {
   Bulb bulb = {id, intensityOn, intensityOn, state};
-  bulbs[bulbCount] = bulb;
+  saveToRom(bulb);
   bulbCount += 1;
-
-  if (!bySys) {
-    saveToRom(); //save to rom if external request
-  }
 }
 
 void removeBulb(uint8_t bulbID) {
@@ -81,34 +82,33 @@ void removeBulb(uint8_t bulbID) {
     bulbs[j] = newBulbs[j];
   }
   bulbCount = count;
-
-  saveToRom(); //save to rom
 }
 
 void changeBulbState(uint8_t bulbID, bool state) {
   for (int i = 0; i < bulbCount; i++) {
-    Bulb bulb = bulbs[i];
-    if (bulb.id == bulbID) {
-      bulb.state = state;
+    int bulbAddress = startAddress + i * 6;
+    int tempId = EEPROM.read(bulbAddress);
+
+    if (tempId == bulbID) {
+      EEPROM.write(bulbAddress + 1, state);
+      EEPROM.commit();
     }
   }
-
-  saveToRom(); //save to rom
 }
 
-void setBulbIntensity(uint8_t bulbID, int intensity, bool onOff) {
+void setBulbIntensity(uint8_t bulbID, int intensity, bool isOn) {
   for (int i = 0; i < bulbCount; i++) {
-    Bulb bulb = bulbs[i];
-    if (bulb.id == bulbID) {
-      if (onOff) {
-        bulb.intensityOn = intensity;
+    int bulbAddress = startAddress + i * 6;
+    int tempId = EEPROM.read(bulbAddress);
+
+    if (tempId == bulbID) {
+      if (isOn) {
+        EEPROM_write_2Byte(bulbAddress + 2, intensity);
       } else {
-        bulb.intensityOff = intensity;
+        EEPROM_write_2Byte(bulbAddress + 4, intensity);
       }
     }
   }
-
-  saveToRom(); //save to rom
 }
 
 bool getBulbState(uint8_t bulbID) {
@@ -117,60 +117,81 @@ bool getBulbState(uint8_t bulbID) {
 }
 
 Bulb findById(uint8_t bulbID) {
+  Bulb bulb = {0, 0, 0, 0};
   for (int i = 0; i < bulbCount; i++) {
-    Bulb bulb = bulbs[i];
-    if (bulb.id == bulbID) {
+    int bulbAddress = startAddress + i * 6;
+    int tempId = EEPROM.read(bulbAddress);
+    if (tempId == bulbID) {
+      byte tempState = EEPROM.read(bulbAddress + 1);
+      byte tempIntensityOn = EEPROM_read_2Byte(bulbAddress + 2);
+      byte tempIntensityOff = EEPROM_read_2Byte(bulbAddress + 4);
+      bulb = {tempId, tempIntensityOn, tempIntensityOff, tempState};
       return bulb;
     }
   }
+  return bulb;
 }
 
 String getAllDetails() {
   String json = "[";
   for (int i = 0; i < bulbCount; i++) {
-    Bulb bulb = bulbs[i];
-    json += "{\"id\":\"";
-    json += bulb.id;
-    json += "\",\"intensityOn\":\"";
-    json += bulb.intensityOn;
-    json += "\",\"intensityOff\":\"";
-    json += bulb.intensityOff;
-    json += "\",\"state\":\"";
-    json += bulb.state;
-    json += "\"}";
+    int bulbAddress = startAddress + i * 6;
+    json += "{\"id\":";
+    json += (String) EEPROM.read(bulbAddress);
+    json += ",\"intensityOn\":";
+    json += (String) EEPROM_read_2Byte(bulbAddress + 2);
+    json += ",\"intensityOff\":";
+    json += (String) EEPROM_read_2Byte(bulbAddress + 4);
+    json += ",\"state\":";
+    json += (String) EEPROM.read(bulbAddress + 1);
+    if (i == bulbCount - 1) {
+      json += "}";
+    }else{
+      json += "},";
+    }
   }
   json += "]";
   return json;
 }
 
-void saveToRom() {
-  for (int i = 0; i < bulbCount; i++) {
-    Bulb bulb = bulbs[i];
+void saveToRom(Bulb bulb) {
+  int bulbAddress = startAddress + bulbCount * 6;
+  EEPROM_write_2Byte(bulbAddress + 2, bulb.intensityOn);
+  EEPROM_write_2Byte(bulbAddress + 4, bulb.intensityOff);
 
-    int bulbAddress = startAddress + i * 6;
-    EEPROM.write(bulbAddress, bulb.id); //Bulb block size  = 6 byte
-    EEPROM.write(bulbAddress + 1, bulb.state);
-    EEPROM.write(bulbAddress + 2, bulb.intensityOn);
-    EEPROM.write(bulbAddress + 3, bulb.intensityOn);
-    EEPROM.write(bulbAddress + 4, bulb.intensityOff);
-    EEPROM.write(bulbAddress + 5, bulb.intensityOff);
-  }
+  EEPROM.write(bulbAddress, bulb.id); //Bulb block size  = 6 byte
+  EEPROM.write(bulbAddress + 1, bulb.state);
+  EEPROM.write(1, bulbCount);
+  EEPROM.commit();
 }
 
-void getFromRom() {
-  int numOfBulbs = EEPROM.read(0);
+void EEPROM_write_2Byte(int address, int value) {
+  byte leastSignificant8Bit = value;
+  byte mostSignificant8Bit = value >> 8;
+  EEPROM.write(address, mostSignificant8Bit);
+  EEPROM.write(address + 1, leastSignificant8Bit);
+  EEPROM.commit();
+}
 
-  for (int i = 0; i < numOfBulbs; i++) {
-    int bulbAddress = startAddress + i * 6;
-    byte tempId = EEPROM.read(bulbAddress);
-    byte tempState = EEPROM.read(bulbAddress + 1);
-    byte tempIntensityOn = EEPROM.read(bulbAddress + 2);
-    byte tempIntensityOn2 = EEPROM.read(bulbAddress + 3);
-    byte tempIntensityOff = EEPROM.read(bulbAddress + 4);
-    byte tempIntensityOff2 = EEPROM.read(bulbAddress + 5);
+int EEPROM_read_2Byte(int address) {
+  byte mostSignificant8Bit = EEPROM.read(address);
+  byte leastSignificant8Bit = EEPROM.read(address + 1);
+  int value = (mostSignificant8Bit << 8) + leastSignificant8Bit;
+  return value;
+}
 
-    addBulb(tempId, tempIntensityOn, tempIntensityOff, tempState, true);
+void printEEPROM() {
+  String reading = "";
+  Serial.println("----------------------------------------------------------");
+  for (int i = 0; i < eeprom_length; i++) {
+    reading += EEPROM.read(i);
+    reading += " | ";
+    if (i % 50 == 0) {
+      Serial.println(reading);
+      reading = "";
+    }
   }
+  Serial.println("----------------------------------------------------------");
 }
 
 
@@ -204,10 +225,9 @@ void handleAddBulb() {
   if (count == 1) {
     addBulb(id.toInt());
   } else if (count == 3) {
-    addBulb(id.toInt(), intensityOn.toInt(), intensityOff.toInt(), false, false);
+    addBulb(id.toInt(), intensityOn.toInt(), intensityOff.toInt(), false);
   }
 
-  delay(1);
   server.send ( 200, "application/json", "{\"res\":\"OK\"}" );
 }
 
@@ -220,7 +240,6 @@ void handleRemoveBulb() {
   }
   removeBulb(id.toInt());
 
-  delay(1);
   server.send ( 200, "application/json", "{\"res\":\"OK\"}" );
 }
 
@@ -238,7 +257,6 @@ void handleChangeBulbState() {
   }
   changeBulbState(id.toInt(), state);
 
-  delay(1);
   server.send ( 200, "application/json", "{\"res\":\"OK\"}" );
 }
 
@@ -250,39 +268,38 @@ void handleGetBulbState() {
     }
   }
   bool state = getBulbState(id.toInt());
-  String res = "{\"res\":\"";
+  String res = "{\"res\":";
   res += state;
-  res += "\"}";
+  res += "}";
 
-  delay(1);
   server.send ( 200, "application/json", res );
 }
 
 void handleSetIntensity() {
   String id;
   String intensity;
-  bool onOff = false;
+  bool isOn = false;
   for ( uint8_t i = 0; i < server.args(); i++ ) {
     if (server.argName ( i ) == "id") {
       id = server.arg ( i );
     } else if (server.argName ( i ) == "intensity") {
       intensity = server.arg ( i );
-    } else if (server.argName ( i ) == "onOff") {
+    } else if (server.argName ( i ) == "isOn") {
       if (server.arg ( i ) == "true") {
-        onOff = true;
+        isOn = true;
       }
     }
   }
-  setBulbIntensity(id.toInt(), intensity.toInt(), onOff);
+  setBulbIntensity(id.toInt(), intensity.toInt(), isOn);
 
-  delay(1);
   server.send ( 200, "application/json", "{\"res\":\"OK\"}" );
 }
 
 void handleGetDetails() {
-  String res = getAllDetails();
+  String res = "{\"res\":";
+  res += getAllDetails();
+  res += "}";
 
-  delay(1);
   server.send ( 200, "application/json", res );
 }
 
