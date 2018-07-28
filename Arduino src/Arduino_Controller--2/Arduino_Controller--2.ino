@@ -1,6 +1,7 @@
 #include <SoftwareSerial.h>
 
 SoftwareSerial SoftSerial(10, 11); // Rx,Tx
+//#define SoftSerial Serial
 
 struct Bulb {
   uint8_t id;
@@ -102,6 +103,7 @@ void changeBulbState(uint8_t bulbID, bool state) {
 bool getBulbState(uint8_t bulbID) {
   Bulb bulb = findById(bulbID);
   serialSuccessHandler("" + bulb.state);
+  //  return bulb.state;
 }
 
 /**
@@ -124,6 +126,7 @@ String getAllDetails() {
   }
   json += "]";
   serialSuccessHandler(json);
+  //  return json;
 }
 
 /**
@@ -192,6 +195,12 @@ void handleSerial() {
 void functionHandler(String payload) {
   String function = payload.substring(1, 5);
   String variableStr = payload.substring(6, payload.length());
+
+  Serial.println("##########################################");
+  Serial.println(payload);
+  Serial.println(function);
+  Serial.println(variableStr);
+  Serial.println("##########################################");
 
   uint8_t count = 1;
   int variables[] = {};
@@ -312,3 +321,5 @@ void serialSuccessHandler(String payload) {
   }
 
 }
+
+

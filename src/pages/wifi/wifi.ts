@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, ToastController } from 'ionic-angular';
 import { Hotspot } from '@ionic-native/hotspot';
 import { NativeStorage } from '@ionic-native/native-storage';
-import { ServiceProvider } from '../../providers/service/service';
-// import {BulbNamePipe} from '../../pipes/bulb-name/bulb-name';
+import { ServiceProvider } from '../../providers/service/service'
 
 @Component({
   selector: 'page-wifi',
@@ -18,13 +17,14 @@ export class WiFiPage {
   ip: string = '192.168.4.1';
   bulbs = [];
   object: any;
-  saveMode:boolean = false;
+  saveMode: boolean = false;
 
   constructor(
     public navCtrl: NavController,
     public storage: NativeStorage,
     private hotspot: Hotspot,
-    private http: ServiceProvider
+    private http: ServiceProvider,
+    public toastCtrl: ToastController,
   ) {
     this.hotspot.isAvailable().then((resolve) => {
       this.status += "<br>~Available";
@@ -68,8 +68,8 @@ export class WiFiPage {
           { "id": 2, "intensity": 1030, "state": 0 },
           { "id": 3, "intensity": 1070, "state": 1 },
         ];
-        this.bulbs = obj;
-        this.object = obj;
+        // this.bulbs = obj;
+        // this.object = obj;
       }, (error) => {
         // console.log('api error', error);
         this.status += "<br><br>~E~" + error;

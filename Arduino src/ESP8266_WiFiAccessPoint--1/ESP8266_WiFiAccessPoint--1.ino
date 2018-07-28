@@ -23,7 +23,8 @@ void setup() {
   Serial.begin(115200);
   //  EEPROM.begin(512);
   //  byte len = EEPROM.length();
-  getFromRom(); //load bulb data from ROM
+  //  getFromRom(); //load bulb data from ROM
+  bulbCount = EEPROM.read(0);
 
   WiFi.softAP(ssid, password);
 
@@ -40,7 +41,7 @@ void setup() {
 
 void loop() {
   server.handleClient();
-  //  delay(1);
+  delay(1);
 }
 
 
@@ -50,20 +51,14 @@ void loop() {
 */
 void addBulb(uint8_t id) {
   Bulb bulb = {id, 0, 0, false};
-  bulbs[bulbCount] = bulb;
+  saveToRom(bulb);
   bulbCount += 1;
-
-  saveToRom(); //save to rom
 }
 
-void addBulb(uint8_t id, int intensityOn, int intensityOff, bool state, bool bySys) {
+void addBulb(uint8_t id, int intensityOn, int intensityOff, bool state) {
   Bulb bulb = {id, intensityOn, intensityOn, state};
-  bulbs[bulbCount] = bulb;
+  saveToRom(bulb);
   bulbCount += 1;
-
-  if (!bySys) {
-    saveToRom(); //save to rom if external request
-  }
 }
 
 void removeBulb(uint8_t bulbID) {
@@ -81,34 +76,35 @@ void removeBulb(uint8_t bulbID) {
     bulbs[j] = newBulbs[j];
   }
   bulbCount = count;
-
-  saveToRom(); //save to rom
 }
 
 void changeBulbState(uint8_t bulbID, bool state) {
   for (int i = 0; i < bulbCount; i++) {
-    Bulb bulb = bulbs[i];
-    if (bulb.id == bulbID) {
-      bulb.state = state;
+    int bulbAddress = startAddress + i * 6;
+    int tempId = EEPROM.read(bulbAddress);
+
+    if (tempId == bulbID) {
+      EEPROM.write(bulbAddress + 1, state);
     }
   }
-
-  saveToRom(); //save to rom
 }
 
-void setBulbIntensity(uint8_t bulbID, int intensity, bool onOff) {
+void setBulbIntensity(uint8_t bulbID, int intensity, bool isOn) {
   for (int i = 0; i < bulbCount; i++) {
-    Bulb bulb = bulbs[i];
-    if (bulb.id == bulbID) {
-      if (onOff) {
-        bulb.intensityOn = intensity;
+    int bulbAddress = startAddress + i * 6;
+    int tempId = EEPROM.read(bulbAddress);
+
+    if (tempId == bulbID) {
+      if (isOn) {
+        EEPROM.write(bulbAddress + 2, intensity);
+        EEPROM.write(bulbAddress + 3, intensity);
       } else {
-        bulb.intensityOff = intensity;
+        EEPROM.write(bulbAddress + 4, intensity);
+        EEPROM.write(bulbAddress + 5, intensity);
       }
     }
   }
-
-  saveToRom(); //save to rom
+  //  saveToRom(); //save to rom
 }
 
 bool getBulbState(uint8_t bulbID) {
@@ -117,59 +113,73 @@ bool getBulbState(uint8_t bulbID) {
 }
 
 Bulb findById(uint8_t bulbID) {
+  Bulb bulb = {0, 0, 0, 0};
   for (int i = 0; i < bulbCount; i++) {
-    Bulb bulb = bulbs[i];
-    if (bulb.id == bulbID) {
+    int bulbAddress = startAddress + i * 6;
+    int tempId = EEPROM.read(bulbAddress);
+    if (tempId == bulbID) {
+      byte tempState = EEPROM.read(bulbAddress + 1);
+      byte tempIntensityOn = EEPROM.read(bulbAddress + 2);
+      byte tempIntensityOn2 = EEPROM.read(bulbAddress + 3);
+      byte tempIntensityOff = EEPROM.read(bulbAddress + 4);
+      byte tempIntensityOff2 = EEPROM.read(bulbAddress + 5);
+      bulb = {tempId, tempIntensityOn, tempIntensityOff, tempState};
       return bulb;
     }
   }
+  return bulb;
 }
 
 String getAllDetails() {
   String json = "[";
   for (int i = 0; i < bulbCount; i++) {
-    Bulb bulb = bulbs[i];
+    int bulbAddress = startAddress + i * 6;
+
     json += "{\"id\":\"";
-    json += bulb.id;
+    json += EEPROM.read(bulbAddress);
     json += "\",\"intensityOn\":\"";
-    json += bulb.intensityOn;
+    json += EEPROM.read(bulbAddress + 2);
     json += "\",\"intensityOff\":\"";
-    json += bulb.intensityOff;
+    json += EEPROM.read(bulbAddress + 4);
     json += "\",\"state\":\"";
-    json += bulb.state;
+    json += EEPROM.read(bulbAddress + 1);
     json += "\"}";
   }
   json += "]";
   return json;
 }
 
-void saveToRom() {
-  for (int i = 0; i < bulbCount; i++) {
-    Bulb bulb = bulbs[i];
+void saveToRom(Bulb bulb) {
+  EEPROM.write(0, bulbCount);
 
-    int bulbAddress = startAddress + i * 6;
-    EEPROM.write(bulbAddress, bulb.id); //Bulb block size  = 6 byte
-    EEPROM.write(bulbAddress + 1, bulb.state);
-    EEPROM.write(bulbAddress + 2, bulb.intensityOn);
-    EEPROM.write(bulbAddress + 3, bulb.intensityOn);
-    EEPROM.write(bulbAddress + 4, bulb.intensityOff);
-    EEPROM.write(bulbAddress + 5, bulb.intensityOff);
-  }
+  int bulbAddress = startAddress + bulbCount * 6;
+  EEPROM.write(bulbAddress, bulb.id); //Bulb block size  = 6 byte
+  EEPROM.write(bulbAddress + 1, bulb.state);
+  EEPROM.write(bulbAddress + 2, bulb.intensityOn);
+  EEPROM.write(bulbAddress + 3, bulb.intensityOn);
+  EEPROM.write(bulbAddress + 4, bulb.intensityOff);
+  EEPROM.write(bulbAddress + 5, bulb.intensityOff);
 }
 
 void getFromRom() {
   int numOfBulbs = EEPROM.read(0);
+  if (numOfBulbs == 255) {
+    numOfBulbs = 0;
+  }
 
   for (int i = 0; i < numOfBulbs; i++) {
     int bulbAddress = startAddress + i * 6;
-    byte tempId = EEPROM.read(bulbAddress);
+    int tempId = EEPROM.read(bulbAddress);
     byte tempState = EEPROM.read(bulbAddress + 1);
     byte tempIntensityOn = EEPROM.read(bulbAddress + 2);
     byte tempIntensityOn2 = EEPROM.read(bulbAddress + 3);
     byte tempIntensityOff = EEPROM.read(bulbAddress + 4);
     byte tempIntensityOff2 = EEPROM.read(bulbAddress + 5);
+    Serial.print("bulb " + i);
+    Serial.println("==> tempId" + tempId);
 
-    addBulb(tempId, tempIntensityOn, tempIntensityOff, tempState, true);
+
+    addBulb(tempId, tempIntensityOn, tempIntensityOff, tempState);
   }
 }
 
@@ -204,7 +214,7 @@ void handleAddBulb() {
   if (count == 1) {
     addBulb(id.toInt());
   } else if (count == 3) {
-    addBulb(id.toInt(), intensityOn.toInt(), intensityOff.toInt(), false, false);
+    addBulb(id.toInt(), intensityOn.toInt(), intensityOff.toInt(), false);
   }
 
   delay(1);
@@ -261,19 +271,19 @@ void handleGetBulbState() {
 void handleSetIntensity() {
   String id;
   String intensity;
-  bool onOff = false;
+  bool isOn = false;
   for ( uint8_t i = 0; i < server.args(); i++ ) {
     if (server.argName ( i ) == "id") {
       id = server.arg ( i );
     } else if (server.argName ( i ) == "intensity") {
       intensity = server.arg ( i );
-    } else if (server.argName ( i ) == "onOff") {
+    } else if (server.argName ( i ) == "isOn") {
       if (server.arg ( i ) == "true") {
-        onOff = true;
+        isOn = true;
       }
     }
   }
-  setBulbIntensity(id.toInt(), intensity.toInt(), onOff);
+  setBulbIntensity(id.toInt(), intensity.toInt(), isOn);
 
   delay(1);
   server.send ( 200, "application/json", "{\"res\":\"OK\"}" );

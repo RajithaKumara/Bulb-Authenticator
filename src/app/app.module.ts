@@ -14,7 +14,9 @@ import { BulbPage } from '../pages/bulb/bulb';
 import { HotspotPage } from '../pages/hotspot/hotspot';
 import { WiFiPage } from '../pages/wifi/wifi';
 import { ServiceProvider } from '../providers/service/service';
-
+import { PipesModule } from '../pipes/pipes.module';
+import { Httpd,HttpdOptions } from '@ionic-native/httpd';
+import { Network } from '@ionic-native/network';
 @NgModule({
   declarations: [
     MyApp,
@@ -26,6 +28,7 @@ import { ServiceProvider } from '../providers/service/service';
   imports: [
     BrowserModule,
     HttpClientModule,
+    PipesModule,
     IonicModule.forRoot(MyApp)
   ],
   bootstrap: [IonicApp],
@@ -43,7 +46,9 @@ import { ServiceProvider } from '../providers/service/service';
     NativeStorage,
     AndroidPermissions,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
-    ServiceProvider
+    ServiceProvider,
+    Httpd,
+    Network
   ]
 })
 export class AppModule { }
