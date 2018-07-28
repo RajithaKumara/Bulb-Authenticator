@@ -14,6 +14,7 @@ import { BulbPage } from '../pages/bulb/bulb';
 import { HotspotPage } from '../pages/hotspot/hotspot';
 import { WiFiPage } from '../pages/wifi/wifi';
 import { ServiceProvider } from '../providers/service/service';
+import { PipesModule } from '../pipes/pipes.module';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { ServiceProvider } from '../providers/service/service';
   imports: [
     BrowserModule,
     HttpClientModule,
+    PipesModule,
     IonicModule.forRoot(MyApp)
   ],
   bootstrap: [IonicApp],

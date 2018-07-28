@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, ToastController } from 'ionic-angular';
 import { NativeStorage } from '@ionic-native/native-storage';
-import { ToastController } from 'ionic-angular';
 import { ServiceProvider } from '../../providers/service/service';
 
 @Component({
@@ -40,24 +39,38 @@ export class BulbPage {
   }
 
   addBulb() {
-    let current = Date.now();
-    this.storage.setItem("" + current, {
-      bulbName: this.bulbName,
-      bulbId: this.bulbId,
-      bulbData: this.bulbData
-    }).then((resolve) => {
-      this.showToast('Successfully added...');
-      this.bulbName = ""
-      this.bulbId = ""
-      this.bulbData = ""
-      this.add = false;
-    }).catch((error) => {
-      this.showToast('Error occured...')
-    });
+    this.http.get("http://" + this.ip + "/addBulb?id=" + this.bulbId)
+      .subscribe((observer) => {
+        this.object = observer;
+      }, (error) => {
+        this.showToast('Error occured in request...');
+        // this.status += "<br><br>~E~" + error;
+        // this.object = error;
+      }, () => {
+        //Store the bulb data in mobile
+        let current = Date.now();
+        this.storage.setItem("" + current, {
+          bulbName: this.bulbName,
+          bulbId: this.bulbId,
+          bulbData: this.bulbData
+        }).then((resolve) => {
+          this.showToast('Successfully stored...');
+          this.bulbName = ""
+          this.bulbId = ""
+          this.bulbData = ""
+          this.add = false;
+        }).catch((error) => {
+          this.showToast('Error occured in storing...');
+        });
 
-    if (this.bulbKeys.length > 0) {
-      this.getBulbs();
-    }
+        // this.status += "<br><br>~complete";
+      }
+      );
+
+
+    // if (this.bulbKeys.length > 0) {
+    //   this.getBulbs();
+    // }
   }
 
   getBulbs() {
@@ -79,8 +92,7 @@ export class BulbPage {
   }
 
   addNewBulb() {
-    let bulbId = 1;
-    this.http.get("http://" + this.ip + "/addBulb?id=" + bulbId)
+    this.http.get("http://" + this.ip + "/addBulb?id=" + this.bulbId)
       .subscribe((observer) => {
         this.object = observer;
       }, (error) => {

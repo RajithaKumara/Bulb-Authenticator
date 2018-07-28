@@ -56,10 +56,37 @@
       <ion-label>{{bulb}}</ion-label>
     </ion-item> -->
 
-    <button ion-item *ngFor="let bulb of bulbs" (click)="getBulbs()">
+    <!-- <button ion-item *ngFor="let bulb of bulbs" (click)="getBulbs()">
       {{bulb.bulbName}} -({{bulb.bulbId}})
-    </button>
+    </button> -->
   </ion-list>
+
+
+  <ion-list>
+    <ion-item>
+      <h1 padding-vertical>
+        Bulb details:
+      </h1>
+    </ion-item>
+
+    <ion-item *ngFor="let bulb of bulbs">
+      <ion-card>
+
+        <ion-card-header>
+          {{bulb.bulbName}} - {{bulb.state|bulbState}}
+        </ion-card-header>
+
+        <ion-card-content>
+          <!-- {{bulb.bulbData}} -->
+          <button padding-vertical ion-button block (click)="getData()">
+            Test
+          </button>
+        </ion-card-content>
+
+      </ion-card>
+    </ion-item>
+  </ion-list>
+
 
   <!-- <div padding>
     <p [innerHTML]="status"></p>
