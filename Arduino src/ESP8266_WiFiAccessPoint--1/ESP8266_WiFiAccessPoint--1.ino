@@ -48,7 +48,7 @@ struct Bulb {
 uint8_t bulbCount = 0;
 unsigned long _time;
 int current_intensity = 0;
-int current_state = true; //true ==> up
+int current_state = true; //true ==> up, false ==> down
 
 ESP8266WebServer server(80);
 
@@ -77,7 +77,7 @@ void setup() {
     EEPROM.commit();
   }
 
-  WiFi.softAP(ssid, password,13);
+  WiFi.softAP(ssid, password);
 
   server.on("/", handleRoot);
   server.on("/addBulb", handleAddBulb);
@@ -113,6 +113,7 @@ void loop() {
     if (current_intensity_tmp.length() == payloadLength) {
       current_intensity = current_intensity_tmp.substring(0, 5).toInt();
       current_state = current_intensity_tmp.substring(5).toInt();
+      controlBulbState();
     }
   }
 }
@@ -192,8 +193,8 @@ Bulb findById(uint8_t bulbID) {
     int tempId = EEPROM.read(bulbAddress);
     if (tempId == bulbID) {
       byte tempState = EEPROM.read(bulbAddress + 1);
-      byte tempIntensityOn = EEPROM_read_2Byte(bulbAddress + 2);
-      byte tempIntensityOff = EEPROM_read_2Byte(bulbAddress + 4);
+      int tempIntensityOn = EEPROM_read_2Byte(bulbAddress + 2);
+      int tempIntensityOff = EEPROM_read_2Byte(bulbAddress + 4);
       bulb = {tempId, tempIntensityOn, tempIntensityOff, tempState};
       return bulb;
     }
@@ -261,6 +262,21 @@ String changePassword(String pass, String oldPass) {
   EEPROM.commit();
   pass.toCharArray(password, 9);
   return "OK";
+}
+
+void controlBulbState(){
+  for (int i = 0; i < bulbCount; i++) {
+    int bulbAddress = startAddress + i * 6;
+    int tempIntensityOn = EEPROM_read_2Byte(bulbAddress + 2);
+    int tempIntensityOff = EEPROM_read_2Byte(bulbAddress + 4);
+    byte tempState = EEPROM.read(bulbAddress + 1);
+    if (tempIntensityOn < current_intensity && !current_state && tempState == 0) {
+      EEPROM.write(bulbAddress + 1, true);
+    }else if (tempIntensityOff > current_intensity && current_state && tempState == 1) {
+      EEPROM.write(bulbAddress + 1, false);
+    }
+    EEPROM.commit();
+  }
 }
 
 void printEEPROM() {
@@ -348,11 +364,6 @@ void handleGetBulbState() {
       id = server.arg ( i );
     }
   }
-//  bool state = getBulbState(id.toInt());
-//  String res = "{\"res\":";
-//  res += state;
-//  res += "}";
-
   String res = "OFF";
   if (getBulbState(id.toInt())){
     res = "ON";
@@ -384,7 +395,7 @@ void handleSetIntensity() {
 void handleGetIntensity() {
   String res = "{\"res\":\"";
   res += current_intensity;
-  res += ",\"state\":\"";
+  res += "\",\"state\":\"";
   res += current_state;
   res += "\"}";
 
