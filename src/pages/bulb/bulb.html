@@ -41,29 +41,6 @@
 
   <ion-list>
     <ion-item>
-      <button padding-vertical ion-button block (click)="getBulbs()">
-        Get current data
-      </button>
-    </ion-item>
-
-    <ion-item>
-      <button padding-vertical ion-button block (click)="addNewBulb()">
-        Add Bulb to the system
-      </button>
-    </ion-item>
-
-    <!-- <ion-item *ngFor="let bulb of bulbKeys">
-      <ion-label>{{bulb}}</ion-label>
-    </ion-item> -->
-
-    <!-- <button ion-item *ngFor="let bulb of bulbs" (click)="getBulbs()">
-      {{bulb.bulbName}} -({{bulb.bulbId}})
-    </button> -->
-  </ion-list>
-
-
-  <ion-list>
-    <ion-item>
       <h1 padding-vertical>
         Bulb details:
       </h1>
@@ -73,17 +50,14 @@
       <ion-card>
 
         <ion-card-header>
-<<<<<<< HEAD
-          {{bulb.bulbName}} - <!-- {{bulb.state|bulbState}} -->
-=======
-          {{bulb.bulbName}} - {{bulb.state|bulbState}}
->>>>>>> 36f15bf85d0e86a22be39637706886a9cc0c1440
+          {{bulb.id}} - {{bulb.bulbName}}
         </ion-card-header>
 
         <ion-card-content>
-          <!-- {{bulb.bulbData}} -->
-          <button padding-vertical ion-button block (click)="getData()">
-            Test
+          <hr> {{bulb.bulbData}}
+          <hr>
+          <button padding-vertical ion-button block (click)="removeBulb(bulb)">
+            Remove Bulb
           </button>
         </ion-card-content>
 
@@ -93,11 +67,15 @@
 
 
   <!-- <div padding>
+    <hr>
+    <hr>
+    <h1 padding-vertical>
+      Logs:
+    </h1>
     <p [innerHTML]="status"></p>
-  </div> -->
-  <hr>
-  <hr>
+  </div>
+
   <div padding>
     {{object|json}}
-  </div>
+  </div> -->
 </ion-content>

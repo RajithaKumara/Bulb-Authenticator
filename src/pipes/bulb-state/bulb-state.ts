@@ -13,10 +13,10 @@ export class BulbStatePipe implements PipeTransform {
    * Takes a value and makes it lowercase.
    */
   transform(value: string, ...args) {
-    if (value == '0'){
-      return "ON";
+    if (value == '0') {
+      return "OFF";
     }
-    return "OFF";
+    return "ON";
     // return value.toLowerCase();
   }
 }

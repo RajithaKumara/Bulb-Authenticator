@@ -1,31 +1,31 @@
 <ion-header>
   <ion-navbar>
-    <ion-title >
+    <ion-title>
       Connect to bulb
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <ion-list >
-      <ion-grid>
-          <ion-row>
-            <ion-col col-6>
-                <ion-item *ngIf="connected">
-                    <div class="item-content">
-                        
-                            <p>You have Connected</p>
-                          
-                      </div>
-                    </ion-item>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col col-6></ion-col>
-          </ion-row>
-        </ion-grid>
-     
-    
+  <ion-list>
+    <ion-grid>
+      <ion-row>
+        <ion-col col-6>
+          <ion-item *ngIf="connected">
+            <div class="item-content">
+
+              <p>You have Connected</p>
+
+            </div>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col col-6></ion-col>
+      </ion-row>
+    </ion-grid>
+
+
     <ion-item *ngIf="!connected">
       <ion-label fixed>SSID</ion-label>
       <ion-input type="text" [(ngModel)]="ssid"></ion-input>
@@ -33,13 +33,13 @@
 
     <ion-item *ngIf="!connected">
       <ion-label fixed>Password</ion-label>
-    
-      <ion-input [type]="passwordType" [(ngModel)]="password" ></ion-input>
+
+      <ion-input [type]="passwordType" [(ngModel)]="password"></ion-input>
       <button ion-button icon-only item-end clear (click)='hideShowPassword()'>
         <ion-icon item-end [name]="passwordIcon" class="passwordIcon" (click)='hideShowPassword()'></ion-icon>
-        </button>
-      
-      
+      </button>
+
+
     </ion-item>
 
     <ion-item *ngIf="!connected">
@@ -65,22 +65,33 @@
       </button>
     </ion-item>
     <ion-item>
-        <button padding-vertical ion-button block (click)="updatepassword()">
-          Update Password
-        </button>
-      </ion-item>
-  </ion-list>
-
-  <!-- <ion-list>
-    <ion-item *ngFor="let bulb of bulbs">
-      <ion-label>SSID</ion-label>
-      <button padding-vertical ion-button block (click)="getData()">
-        Get current data
+      <button padding-vertical ion-button block (click)="updatepassword()">
+        Update Password
       </button>
     </ion-item>
-  </ion-list> -->
+    <ion-item>
+      <button padding-vertical ion-button block (click)="enableQuickSwitchOnMode()">
+        Enable Quick Switch On Mode
+      </button>
+    </ion-item>
+    <ion-item>
+      <button padding-vertical ion-button block (click)="diableQuickSwitchOnMode()">
+        Diable Quick Switch On Mode
+      </button>
+    </ion-item>
+    <ion-item>
+      <button padding-vertical ion-button block (click)="updateFinish()">
+        Update Finish
+      </button>
+    </ion-item>
+  </ion-list>
 
   <div padding>
+    <hr>
+    <hr>
+    <h1 padding-vertical>
+      Logs:
+    </h1>
     <p [innerHTML]="status"></p>
   </div>
 </ion-content>

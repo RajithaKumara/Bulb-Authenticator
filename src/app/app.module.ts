@@ -15,8 +15,6 @@ import { HotspotPage } from '../pages/hotspot/hotspot';
 import { WiFiPage } from '../pages/wifi/wifi';
 import { ServiceProvider } from '../providers/service/service';
 import { PipesModule } from '../pipes/pipes.module';
-
-import { Httpd,HttpdOptions } from '@ionic-native/httpd';
 import { Network } from '@ionic-native/network';
 
 
@@ -51,7 +49,6 @@ import { Network } from '@ionic-native/network';
     AndroidPermissions,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
     ServiceProvider,
-    Httpd,
     Network
   ]
 })

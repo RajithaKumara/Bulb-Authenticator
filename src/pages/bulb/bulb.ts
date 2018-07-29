@@ -32,6 +32,8 @@ export class BulbPage {
     }).catch((error) => {
       this.showToast('Error occured when loading ip...');
     });
+
+    this.getBulbs();
   }
 
   addABulb() {
@@ -49,12 +51,13 @@ export class BulbPage {
       }, () => {
         //Store the bulb data in mobile
         let current = Date.now();
-        this.storage.setItem("" + current, {
+        this.storage.setItem("bulbID-" + this.bulbId, {
           bulbName: this.bulbName,
           bulbId: this.bulbId,
           bulbData: this.bulbData
         }).then((resolve) => {
           this.showToast('Successfully stored...');
+          this.getBulbs();
           this.bulbName = ""
           this.bulbId = ""
           this.bulbData = ""
@@ -62,15 +65,8 @@ export class BulbPage {
         }).catch((error) => {
           this.showToast('Error occured in storing...');
         });
-
-        // this.status += "<br><br>~complete";
       }
       );
-
-
-    // if (this.bulbKeys.length > 0) {
-    //   this.getBulbs();
-    // }
   }
 
   getBulbs() {
@@ -80,30 +76,38 @@ export class BulbPage {
       this.bulbKeys = keys;
       this.status += '<br>' + keys;
       this.bulbKeys.forEach(id => {
-        this.storage.getItem("" + id).then((value) => {
-          this.bulbs.push(value);
-        }).catch((error) => {
-          this.showToast("Error occured...")
-        });
+        let strKey = "" + id;
+        if (strKey.substring(0, 7) === "bulbID-"){
+          this.storage.getItem(strKey).then((value) => {
+            value["id"] = strKey.substring(7);
+            this.bulbs.push(value);
+          }).catch((error) => {
+            this.showToast("Error occured...")
+          });
+        } 
       });
     }).catch((error) => {
       this.status += '<br>' + error;
     });
   }
 
-  addNewBulb() {
-    this.http.get("http://" + this.ip + "/addBulb?id=" + this.bulbId)
+  removeBulb(bulb){
+    let id = bulb.id;
+    this.http.get("http://" + this.ip + "/removeBulb?id=" + id)
       .subscribe((observer) => {
         this.object = observer;
       }, (error) => {
-        // console.log('api error', error);
-        this.status += "<br><br>~E~" + error;
-        this.object = error;
+        this.showToast('Error occured in request...');
       }, () => {
-        // console.log('complete');
-        this.status += "<br><br>~complete";
+        this.storage.remove("bulbID-" + id).then((resolve) => {
+          this.showToast('Successfully removed...');
+          this.getBulbs();
+        }).catch((error) => {
+          this.showToast('Error occured in storage...');
+        });
       }
       );
+
   }
 
   showToast(msg) {

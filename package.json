@@ -22,7 +22,6 @@
     "@ionic-native/android-permissions": "^4.9.0",
     "@ionic-native/core": "4.8.0",
     "@ionic-native/hotspot": "^4.9.0",
-    "@ionic-native/httpd": "^4.10.1",
     "@ionic-native/native-storage": "^4.9.0",
     "@ionic-native/network": "^4.10.1",
     "@ionic-native/splash-screen": "4.8.0",
@@ -34,7 +33,6 @@
     "cordova-plugin-compat": "^1.2.0",
     "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-hotspot": "^1.2.10",
-    "cordova-plugin-httpd": "^0.9.3",
     "cordova-plugin-ionic-keyboard": "^2.0.5",
     "cordova-plugin-ionic-webview": "^1.1.19",
     "cordova-plugin-nativestorage": "^2.3.1",
@@ -62,7 +60,6 @@
       "cordova-plugin-ionic-keyboard": {},
       "cordova-plugin-nativestorage": {},
       "cordova-plugin-android-permissions": {},
-      "cordova-plugin-httpd": {},
       "cordova-plugin-network-information": {}
     },
     "platforms": [

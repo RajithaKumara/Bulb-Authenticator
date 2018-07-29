@@ -11,107 +11,114 @@
 
 <ion-content padding>
   <ion-list>
- <ion-card>
-    <ion-item>
-      <ion-label fixed>SSID</ion-label>
-      <ion-input type="text" [(ngModel)]="ssid"></ion-input>
-    </ion-item>
+    <ion-card>
+      <ion-item>
+        <ion-label fixed>SSID</ion-label>
+        <ion-input type="text" [(ngModel)]="ssid"></ion-input>
+      </ion-item>
 
-    <ion-item>
-      <ion-label fixed>Password</ion-label>
-      <ion-input [type]="passwordType1" [(ngModel)]="password"></ion-input>
-      <button ion-button icon-only item-end clear (click)='hideShowPassword1()'>
-        <ion-icon item-end [name]="passwordIcon1" class="passwordIcon1" (click)='hideShowPassword1()'></ion-icon>
+      <ion-item>
+        <ion-label fixed>Password</ion-label>
+        <ion-input [type]="passwordType1" [(ngModel)]="password"></ion-input>
+        <button ion-button icon-only item-end clear (click)='hideShowPassword1()'>
+          <ion-icon item-end [name]="passwordIcon1" class="passwordIcon1" (click)='hideShowPassword1()'></ion-icon>
         </button>
-    </ion-item>
+      </ion-item>
 
-    <ion-item>
-      <ion-label fixed>Host IP</ion-label>
-      <ion-input type="text" [(ngModel)]="ip"></ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label fixed>Host IP</ion-label>
+        <ion-input type="text" [(ngModel)]="ip"></ion-input>
+      </ion-item>
 
-    <ion-item>
-      <button padding-vertical ion-button block (click)="connectToWifi()">
-        connect
-      </button>
-    </ion-item>
-  </ion-card>
-    <ion-item>
-      <button padding-vertical ion-button block (click)="getDetails()">
-        Get current data
-      </button>
-    </ion-item>
+      <ion-item>
+        <button padding-vertical ion-button block (click)="connectToWifi()">
+          connect
+        </button>
+      </ion-item>
+    </ion-card>
     <ion-item *ngIf="!change">
       <button padding-vertical ion-button block (click)="changepass()">
         Change Password
       </button>
     </ion-item>
-    
+
   </ion-list>
   <ion-card *ngIf="change">
     <ion-card-header>Change Password</ion-card-header>
-    
+
     <ion-item>
-      <ion-label fixed>Current passord</ion-label>
-      <ion-input [type]="passwordType"  [(ngModel)]="spassword" readonly=true></ion-input>
+      <ion-label fixed>Current Password</ion-label>
+      <ion-input [type]="passwordType" [(ngModel)]="spassword" readonly=true></ion-input>
       <button ion-button icon-only item-end clear (click)='hideShowPassword()'>
         <ion-icon item-end [name]="passwordIcon" class="passwordIcon" (click)='hideShowPassword()'></ion-icon>
-        </button>
+      </button>
     </ion-item>
     <ion-item>
-      <ion-label fixed>New password</ion-label>
-      <ion-input (ionInput)="getItems($event)" [type]="passwordType" [(ngModel)]="passwordnew" ></ion-input>
+      <ion-label fixed>New Password</ion-label>
+      <ion-input (ionInput)="getItems($event)" [type]="passwordType" [(ngModel)]="passwordnew"></ion-input>
       <button ion-button icon-only item-end clear (click)='hideShowPassword()'>
         <ion-icon item-end [name]="passwordIcon" class="passwordIcon" (click)='hideShowPassword()'></ion-icon>
-        </button>
-        
+      </button>
+
     </ion-item>
     <ion-item>
-    <button ion-button block (click)="changepassword()">
-      change
-    </button> 
-  </ion-item>
- 
+      <button ion-button block (click)="changepassword()">
+        change
+      </button>
+    </ion-item>
+
 
   </ion-card>
 
-  <ion-list >
+  <ion-list>
+    <ion-item>
+      <hr>
+      <hr>
+      <h1 padding-vertical>
+        Bulb Data:
+      </h1>
+    </ion-item>
+
     <ion-item>
       <ion-label>Intensity Save Mode</ion-label>
       <ion-toggle end [(ngModel)]="saveMode"></ion-toggle>
+    </ion-item>
+
+    <ion-item>
+      <button padding-vertical ion-button block (click)="getDetails()">
+        Get current data
+      </button>
     </ion-item>
 
     <ion-item *ngFor="let bulb of bulbs">
       <ion-card>
 
         <ion-card-header>
-          {{bulb.id}} - {{bulb.state|bulbState}}
+          {{bulb.id}} - {{bulb.bulbName}} - {{bulb.state|bulbState}}
         </ion-card-header>
 
         <ion-card-content>
-          <button padding-vertical ion-button block (click)="getData()">
+          <hr> {{bulb.bulbData}}
+          <hr>
+          <button padding-vertical ion-button block (click)="switch(bulb)">
             Switch {{!bulb.state|bulbState}}
           </button>
         </ion-card-content>
 
       </ion-card>
-
-      <!-- <ion-label>{{bulb.id}}
-        <button padding-vertical end ion-button (click)="getData()">
-          Set on Intensity
-        </button>
-        <button padding-vertical end ion-button (click)="getData()">
-          Set off Intensity
-        </button>
-      </ion-label> -->
     </ion-item>
   </ion-list>
 
 
   <div padding>
+    <hr>
+    <hr>
+    <h1 padding-vertical>
+      Logs:
+    </h1>
     <p [innerHTML]="status"></p>
   </div>
-  <div padding>
+  <!-- <div padding>
     {{object|json}}
-  </div>
+  </div> -->
 </ion-content>
