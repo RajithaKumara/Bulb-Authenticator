@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, ToastController } from 'ionic-angular';
 import { NativeStorage } from '@ionic-native/native-storage';
-import { ToastController } from 'ionic-angular';
 import { ServiceProvider } from '../../providers/service/service';
 
 @Component({
@@ -93,8 +92,7 @@ export class BulbPage {
   }
 
   addNewBulb() {
-    let bulbId = 1;
-    this.http.get("http://" + this.ip + "/addBulb?id=" + bulbId)
+    this.http.get("http://" + this.ip + "/addBulb?id=" + this.bulbId)
       .subscribe((observer) => {
         this.object = observer;
       }, (error) => {

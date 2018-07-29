@@ -63,12 +63,7 @@ export class WiFiPage {
         // this.status += "<br><br>~" + observer;
         this.object = observer;
 
-        let obj = [
-          { "id": 1, "intensity": 1000, "state": 1 },
-          { "id": 2, "intensity": 1030, "state": 0 },
-          { "id": 3, "intensity": 1070, "state": 1 },
-        ];
-        // this.bulbs = obj;
+
         // this.object = obj;
       }, (error) => {
         // console.log('api error', error);

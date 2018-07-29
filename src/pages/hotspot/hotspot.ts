@@ -6,6 +6,7 @@ import { ServiceProvider } from '../../providers/service/service'
 import { AlertController } from 'ionic-angular';
 import { LoadingController } from 'ionic-angular';
 import { Network } from '@ionic-native/network';
+
 @Component({
   selector: 'page-hotspot',
   templateUrl: 'hotspot.html'
@@ -22,6 +23,8 @@ export class HotspotPage {
  navigator: any;
  Connection: any;
  errors:string='';
+ passwordType: string = 'password';
+ passwordIcon: string = 'eye-off';
   constructor(
     private alertCtrl: AlertController,
     public navCtrl: NavController,
@@ -147,7 +150,7 @@ updatepassword(){
           if(data.password.length==8){
             this.status += "<br>~password="+data.password;
             this.http.get("http://" + this.ip + "/changePass?password=" + data.password).subscribe((observer)=>{
-              this.status += "<br>~password "+observer.res;
+              this.status += "<br>~password "+observer;
           },(err)=>{
             this.status += "<br>~can not change password"+err;
             this.showAlert("connection error","can not update password "+err);
@@ -239,6 +242,12 @@ getpassword(){
   }).catch((error) => {
     this.showToast('Error occured when loading ip...');
   });
+}
+
+hideShowPassword() {
+  
+  this.passwordType = this.passwordType  === 'text' ? 'password' : 'text';
+  this.passwordIcon = this.passwordIcon === 'eye-off' ? 'eye' : 'eye-off';
 }
 
 }
