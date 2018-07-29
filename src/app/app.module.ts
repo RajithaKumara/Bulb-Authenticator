@@ -16,6 +16,11 @@ import { WiFiPage } from '../pages/wifi/wifi';
 import { ServiceProvider } from '../providers/service/service';
 import { PipesModule } from '../pipes/pipes.module';
 
+import { Httpd,HttpdOptions } from '@ionic-native/httpd';
+import { Network } from '@ionic-native/network';
+
+
+
 @NgModule({
   declarations: [
     MyApp,
@@ -45,7 +50,9 @@ import { PipesModule } from '../pipes/pipes.module';
     NativeStorage,
     AndroidPermissions,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
-    ServiceProvider
+    ServiceProvider,
+    Httpd,
+    Network
   ]
 })
 export class AppModule { }

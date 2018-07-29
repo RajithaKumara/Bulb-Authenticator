@@ -77,7 +77,7 @@ void setup() {
     EEPROM.commit();
   }
 
-  WiFi.softAP(ssid, password);
+  WiFi.softAP(ssid, password,13);
 
   server.on("/", handleRoot);
   server.on("/addBulb", handleAddBulb);
@@ -124,13 +124,11 @@ void loop() {
 void addBulb(uint8_t id) {
   Bulb bulb = {id, 0, 0, false};
   saveToRom(bulb);
-  bulbCount += 1;
 }
 
 void addBulb(uint8_t id, int intensityOn, int intensityOff, bool state) {
   Bulb bulb = {id, intensityOn, intensityOn, state};
   saveToRom(bulb);
-  bulbCount += 1;
 }
 
 void removeBulb(uint8_t bulbID) {
@@ -232,6 +230,7 @@ void saveToRom(Bulb bulb) {
 
   EEPROM.write(bulbAddress, bulb.id); //Bulb block size  = 6 byte
   EEPROM.write(bulbAddress + 1, bulb.state);
+  bulbCount += 1;
   EEPROM.write(bulbCountAddress, bulbCount);
   EEPROM.commit();
 }
@@ -349,12 +348,17 @@ void handleGetBulbState() {
       id = server.arg ( i );
     }
   }
-  bool state = getBulbState(id.toInt());
-  String res = "{\"res\":";
-  res += state;
-  res += "}";
+//  bool state = getBulbState(id.toInt());
+//  String res = "{\"res\":";
+//  res += state;
+//  res += "}";
 
-  server.send ( 200, "application/json", res );
+  String res = "OFF";
+  if (getBulbState(id.toInt())){
+    res = "ON";
+  }
+
+  server.send ( 200, "text/plain", res );
 }
 
 void handleSetIntensity() {

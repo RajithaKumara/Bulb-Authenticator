@@ -8,27 +8,30 @@
 
 <ion-content padding>
   <ion-list>
-
+ <ion-card>
+    <ion-item>Connect to bulb &amp; configure new bulb:</ion-item>
     <ion-item>
-      <p>Create Hotspot &amp; configure new bulb:</p>
       <button padding-vertical ion-button block [navPush]="pushHotspotPage()">
-        Create Hotspot
+        Connect to Bulb
       </button>
     </ion-item>
-
-    <ion-item>
-      <p>Connect to Wi-Fi Access Point &amp; make system changes:</p>
+</ion-card>
+<ion-card>
+    <ion-item>Connect to Wi-Fi Access Point &amp; make system changes:</ion-item>
+      <ion-item>
       <button padding-vertical ion-button block [navPush]="pushWiFiPage()">
         Connect to Wi-Fi Access Point
       </button>
     </ion-item>
-
-    <ion-item>
-      <p>Add/Remove Bulb details:</p>
+</ion-card>
+<ion-card>
+    <ion-item>Add/Remove Bulb details:</ion-item>
+     <ion-item>
       <button padding-vertical ion-button block [navPush]="pushBulbPage()">
         Add/Remove Bulb
       </button>
     </ion-item>
-
+  </ion-card>
+  
   </ion-list>
 </ion-content>
