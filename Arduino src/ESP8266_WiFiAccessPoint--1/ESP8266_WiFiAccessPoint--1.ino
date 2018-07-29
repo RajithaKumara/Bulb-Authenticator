@@ -24,20 +24,8 @@ void setup() {
   Serial.begin(115200);
   EEPROM.begin(eeprom_length);
   //  byte len = EEPROM.length();
-<<<<<<< HEAD
   //  getFromRom(); //load bulb data from ROM
   bulbCount = EEPROM.read(0);
-=======
-
-  uint8_t isFirstLoad = EEPROM.read(0);
-  if (isFirstLoad == 1) { //not first loading
-    bulbCount = EEPROM.read(1); //load bulb data from ROM
-  } else { //if first time
-    EEPROM.write(0, 1);
-    EEPROM.commit();
-    Serial.println("firsttime");
-  }
->>>>>>> 36f15bf85d0e86a22be39637706886a9cc0c1440
 
   WiFi.softAP(ssid, password);
 
@@ -54,10 +42,7 @@ void setup() {
 
 void loop() {
   server.handleClient();
-<<<<<<< HEAD
   delay(1);
-=======
->>>>>>> 36f15bf85d0e86a22be39637706886a9cc0c1440
 }
 
 
@@ -100,10 +85,6 @@ void changeBulbState(uint8_t bulbID, bool state) {
 
     if (tempId == bulbID) {
       EEPROM.write(bulbAddress + 1, state);
-<<<<<<< HEAD
-=======
-      EEPROM.commit();
->>>>>>> 36f15bf85d0e86a22be39637706886a9cc0c1440
     }
   }
 }
@@ -115,7 +96,6 @@ void setBulbIntensity(uint8_t bulbID, int intensity, bool isOn) {
 
     if (tempId == bulbID) {
       if (isOn) {
-<<<<<<< HEAD
         EEPROM.write(bulbAddress + 2, intensity);
         EEPROM.write(bulbAddress + 3, intensity);
       } else {
@@ -125,14 +105,6 @@ void setBulbIntensity(uint8_t bulbID, int intensity, bool isOn) {
     }
   }
   //  saveToRom(); //save to rom
-=======
-        EEPROM_write_2Byte(bulbAddress + 2, intensity);
-      } else {
-        EEPROM_write_2Byte(bulbAddress + 4, intensity);
-      }
-    }
-  }
->>>>>>> 36f15bf85d0e86a22be39637706886a9cc0c1440
 }
 
 bool getBulbState(uint8_t bulbID) {
@@ -147,15 +119,10 @@ Bulb findById(uint8_t bulbID) {
     int tempId = EEPROM.read(bulbAddress);
     if (tempId == bulbID) {
       byte tempState = EEPROM.read(bulbAddress + 1);
-<<<<<<< HEAD
       byte tempIntensityOn = EEPROM.read(bulbAddress + 2);
       byte tempIntensityOn2 = EEPROM.read(bulbAddress + 3);
       byte tempIntensityOff = EEPROM.read(bulbAddress + 4);
       byte tempIntensityOff2 = EEPROM.read(bulbAddress + 5);
-=======
-      byte tempIntensityOn = EEPROM_read_2Byte(bulbAddress + 2);
-      byte tempIntensityOff = EEPROM_read_2Byte(bulbAddress + 4);
->>>>>>> 36f15bf85d0e86a22be39637706886a9cc0c1440
       bulb = {tempId, tempIntensityOn, tempIntensityOff, tempState};
       return bulb;
     }
@@ -167,7 +134,6 @@ String getAllDetails() {
   String json = "[";
   for (int i = 0; i < bulbCount; i++) {
     int bulbAddress = startAddress + i * 6;
-<<<<<<< HEAD
 
     json += "{\"id\":\"";
     json += EEPROM.read(bulbAddress);
@@ -178,28 +144,12 @@ String getAllDetails() {
     json += "\",\"state\":\"";
     json += EEPROM.read(bulbAddress + 1);
     json += "\"}";
-=======
-    json += "{\"id\":";
-    json += (String) EEPROM.read(bulbAddress);
-    json += ",\"intensityOn\":";
-    json += (String) EEPROM_read_2Byte(bulbAddress + 2);
-    json += ",\"intensityOff\":";
-    json += (String) EEPROM_read_2Byte(bulbAddress + 4);
-    json += ",\"state\":";
-    json += (String) EEPROM.read(bulbAddress + 1);
-    if (i == bulbCount - 1) {
-      json += "}";
-    }else{
-      json += "},";
-    }
->>>>>>> 36f15bf85d0e86a22be39637706886a9cc0c1440
   }
   json += "]";
   return json;
 }
 
 void saveToRom(Bulb bulb) {
-<<<<<<< HEAD
   EEPROM.write(0, bulbCount);
 
   int bulbAddress = startAddress + bulbCount * 6;
@@ -230,43 +180,6 @@ void getFromRom() {
 
 
     addBulb(tempId, tempIntensityOn, tempIntensityOff, tempState);
-=======
-  int bulbAddress = startAddress + bulbCount * 6;
-  EEPROM_write_2Byte(bulbAddress + 2, bulb.intensityOn);
-  EEPROM_write_2Byte(bulbAddress + 4, bulb.intensityOff);
-
-  EEPROM.write(bulbAddress, bulb.id); //Bulb block size  = 6 byte
-  EEPROM.write(bulbAddress + 1, bulb.state);
-  EEPROM.write(1, bulbCount);
-  EEPROM.commit();
-}
-
-void EEPROM_write_2Byte(int address, int value) {
-  byte leastSignificant8Bit = value;
-  byte mostSignificant8Bit = value >> 8;
-  EEPROM.write(address, mostSignificant8Bit);
-  EEPROM.write(address + 1, leastSignificant8Bit);
-  EEPROM.commit();
-}
-
-int EEPROM_read_2Byte(int address) {
-  byte mostSignificant8Bit = EEPROM.read(address);
-  byte leastSignificant8Bit = EEPROM.read(address + 1);
-  int value = (mostSignificant8Bit << 8) + leastSignificant8Bit;
-  return value;
-}
-
-void printEEPROM() {
-  String reading = "";
-  Serial.println("----------------------------------------------------------");
-  for (int i = 0; i < eeprom_length; i++) {
-    reading += EEPROM.read(i);
-    reading += " | ";
-    if (i % 50 == 0) {
-      Serial.println(reading);
-      reading = "";
-    }
->>>>>>> 36f15bf85d0e86a22be39637706886a9cc0c1440
   }
   Serial.println("----------------------------------------------------------");
 }
