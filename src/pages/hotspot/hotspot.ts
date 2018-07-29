@@ -124,60 +124,22 @@ updatebulbid(){
 }
 
 updatepassword(){
-  
-  let alert = this.alertCtrl.create({
-    title: 'update password',
-    inputs: [
-      {
-        name: 'password',
-        placeholder: 'password',
-      
-      }
-      
-    ],
-    buttons: [
-      {
-        text: 'Cancel',
-        role: 'cancel',
-        handler: data => {
-          console.log('Cancel clicked');
-        }
-      },
-      {
-        text: 'update',
-        handler: data => {
-          
-          if(data.password.length==8){
-            this.status += "<br>~password="+data.password;
-            this.http.get("http://" + this.ip + "/changePass?password=" + data.password).subscribe((observer)=>{
+
+  this.storage.getItem('password').then((result) => {
+    this.status += "<br>~password stored="+result;
+    this.http.get("http://" + this.ip + "/changePass?password=" + result).subscribe((observer)=>{
               this.status += "<br>~password "+observer;
           },(err)=>{
             this.status += "<br>~can not change password"+err;
             this.showAlert("connection error","can not update password "+err);
           },()=>{
             this.status += "<br>~password has changed";
-            this.storage.setItem("password" ,data.password
-          ).then((resolve) => {
-            this.showToast('Successfully stored...');
-          }).catch((error) => {
-            this.showToast('Error occured in storing...');
-            this.showAlert("DB error","can not store password "+error);
           });
-          });
-            
-            
-            
-          }else{
-            this.showAlert('Bad Password','Please Enter password with 8 characters  ');
-          }
-          
-          
-
-        }
-      }
-    ]
+  }).catch((error) => {
+    this.showToast('Error occured when loading ip...');
   });
-  alert.present();
+  
+  
 }
 
 

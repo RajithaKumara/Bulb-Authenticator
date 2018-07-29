@@ -35,7 +35,10 @@
       <ion-label fixed>Password</ion-label>
     
       <ion-input [type]="passwordType" [(ngModel)]="password" ></ion-input>
-      <ion-icon item-end [name]="passwordIcon" class="passwordIcon" (click)='hideShowPassword()'></ion-icon>
+      <button ion-button icon-only item-end clear (click)='hideShowPassword()'>
+        <ion-icon item-end [name]="passwordIcon" class="passwordIcon" (click)='hideShowPassword()'></ion-icon>
+        </button>
+      
       
     </ion-item>
 
