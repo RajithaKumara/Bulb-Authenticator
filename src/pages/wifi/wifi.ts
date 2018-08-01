@@ -55,7 +55,6 @@ export class WiFiPage {
       this.status += "<br>~Wifi Not Supported";
     });
     this.storage.getItem('password').then((result) => {
-      this.status += "<br>~password stored=" + result;
       this.spassword = result;
     }).catch((error) => {
       // this.showToast('Error occured when loading password...');
@@ -77,9 +76,9 @@ export class WiFiPage {
       .subscribe((observer) => {
         this.object = observer;
         this.bulbs = observer["res"];
-        if (this.bulbs.length == 0){
+        if (this.bulbs.length == 0) {
           this.showToast("No bulb data records...");
-        }else{
+        } else {
           this.showToast("Successfully updated bulb data...");
         }
 
@@ -87,7 +86,7 @@ export class WiFiPage {
         this.status += "<br><br>~E~" + error;
         this.object = error;
       }, () => {
-        this.status += "<br><br>~complete";
+        // this.status += "<br><br>~complete";
         let bulbArray = [];
         this.bulbs.forEach(bulb => {
           this.storage.getItem("bulbID-" + bulb.id).then((value) => {
@@ -128,7 +127,7 @@ export class WiFiPage {
         this.status += "<br><br>~E~" + error;
         this.object = error;
       }, () => {
-        this.status += "<br><br>~complete";
+        // this.status += "<br><br>~complete";
       }
       );
   }
@@ -141,7 +140,6 @@ export class WiFiPage {
     this.http.get("http://" + this.ip + "/getIntensity")
       .subscribe((observer) => {
         let intensity = observer["res"];
-        let state = observer["state"];
 
         this.http.get("http://" + this.ip + "/setIntensity?id=" + id + "&intensity=" + intensity + "&isOn=" + strState)
           .subscribe((observer) => {
@@ -152,14 +150,14 @@ export class WiFiPage {
             this.status += "<br><br>~E~" + error;
             this.object = error;
           }, () => {
-            this.status += "<br><br>~complete";
+            // this.status += "<br><br>~complete";
           }
           );
       }, (error) => {
         this.status += "<br><br>~E~" + error;
         this.object = error;
       }, () => {
-        this.status += "<br><br>~complete";
+        // this.status += "<br><br>~complete";
       }
       );
   }
@@ -176,20 +174,27 @@ export class WiFiPage {
     this.change = false;
     if (this.passwordnew.length == 8) {
 
-      this.http.get("http://" + this.ip + "/changePass?password=" + this.passwordnew).subscribe((observer) => {
+      this.http.get("http://" + this.ip + "/changePassword?password=" + this.passwordnew + "&oldPassword=" + this.spassword).subscribe((observer) => {
         this.status += "<br>~password " + observer;
+        if (observer["res"] == "OK") {
+          this.status += "<br>~password has changed";
+          this.storage.setItem("password", this.passwordnew
+          ).then((resolve) => {
+            this.spassword = this.passwordnew;
+            this.passwordnew = "";
+            this.showToast('Successfully stored...');
+          }).catch((error) => {
+            this.showToast('Error occured in storing...');
+            this.showAlert("DB error", "can not store password " + error);
+          });
+        } else {
+          this.showToast('Old password is wrong...');
+        }
       }, (err) => {
         this.status += "<br>~can not change password" + err;
         this.showAlert("connection error", "can not update password " + err);
       }, () => {
-        this.status += "<br>~password has changed";
-        this.storage.setItem("password", this.passwordnew
-        ).then((resolve) => {
-          this.showToast('Successfully stored...');
-        }).catch((error) => {
-          this.showToast('Error occured in storing...');
-          this.showAlert("DB error", "can not store password " + error);
-        });
+
       });
 
     } else {
