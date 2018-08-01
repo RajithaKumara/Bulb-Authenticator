@@ -9,14 +9,11 @@ import { Pipe, PipeTransform } from '@angular/core';
   name: 'bulbState',
 })
 export class BulbStatePipe implements PipeTransform {
-  /**
-   * Takes a value and makes it lowercase.
-   */
+
   transform(value: string, ...args) {
     if (value == '0') {
       return "OFF";
     }
     return "ON";
-    // return value.toLowerCase();
   }
 }

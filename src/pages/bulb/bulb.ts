@@ -46,11 +46,8 @@ export class BulbPage {
         this.object = observer;
       }, (error) => {
         this.showToast('Error occured in request...');
-        // this.status += "<br><br>~E~" + error;
-        // this.object = error;
       }, () => {
         //Store the bulb data in mobile
-        let current = Date.now();
         this.storage.setItem("bulbID-" + this.bulbId, {
           bulbName: this.bulbName,
           bulbId: this.bulbId,
@@ -77,21 +74,21 @@ export class BulbPage {
       this.status += '<br>' + keys;
       this.bulbKeys.forEach(id => {
         let strKey = "" + id;
-        if (strKey.substring(0, 7) === "bulbID-"){
+        if (strKey.substring(0, 7) === "bulbID-") {
           this.storage.getItem(strKey).then((value) => {
             value["id"] = strKey.substring(7);
             this.bulbs.push(value);
           }).catch((error) => {
             this.showToast("Error occured...")
           });
-        } 
+        }
       });
     }).catch((error) => {
       this.status += '<br>' + error;
     });
   }
 
-  removeBulb(bulb){
+  removeBulb(bulb) {
     let id = bulb.id;
     this.http.get("http://" + this.ip + "/removeBulb?id=" + id)
       .subscribe((observer) => {
@@ -117,6 +114,4 @@ export class BulbPage {
     });
     toast.present();
   }
-
-
 }

@@ -64,12 +64,12 @@ export class HotspotPage {
       this.showAlert("Wifi Error", this.errors);
     }
   }
+
   connectTobulb() {
     this.status += "<br>~ip=" + this.ip;
     this.status += "<br>~ssid=" + this.ssid;
     this.status += "<br>~passwd=" + this.password;
-    // this.connected=true;
-    // this.storage.setItem('ip', this.ip);
+
     this.presentLoadig();
     this.hotspot.connectToWifi(this.ssid, this.password).then((resolve) => {
       this.status += "<br>~Success";
@@ -81,7 +81,6 @@ export class HotspotPage {
   }
 
   updatebulbid() {
-
     let alert = this.alertCtrl.create({
       title: 'update bulb',
       inputs: [
@@ -90,7 +89,6 @@ export class HotspotPage {
           placeholder: 'Bulb id',
           max: 2
         }
-
       ],
       buttons: [
         {
@@ -103,8 +101,6 @@ export class HotspotPage {
         {
           text: 'update',
           handler: data => {
-
-
             this.status += "<br>~id=" + data.id;
             this.http.get("http://" + this.ip + "/changeId?id=" + data.id).subscribe((observer) => {
 
@@ -114,8 +110,6 @@ export class HotspotPage {
             }, () => {
               this.status += "<br>~bulb id has changed";
             });
-
-
           }
         }
       ]
@@ -124,7 +118,6 @@ export class HotspotPage {
   }
 
   updatepassword() {
-
     this.storage.getItem('password').then((result) => {
       this.status += "<br>~password stored=" + result;
       this.http.get("http://" + this.ip + "/changePass?password=" + result).subscribe((observer) => {
@@ -142,7 +135,6 @@ export class HotspotPage {
 
   showAlert(Title, Mess) {
     const alert = this.alertCtrl.create({
-
       title: Title,
       subTitle: Mess,
       buttons: ['OK']
@@ -161,22 +153,6 @@ export class HotspotPage {
       loading.dismiss();
     }, 1000);
   }
-
-  // addNewBulb() {
-  //   let bulbId = 1;
-  //   this.http.get("http://" + this.ip + "/addBulb?id=" + bulbId)
-  //     .subscribe((observer) => {
-  //       this.object = observer;
-  //     }, (error) => {
-  //       // console.log('api error', error);
-  //       this.status += "<br><br>~E~" + error;
-  //       this.object = error;
-  //     }, () => {
-  //       // console.log('complete');
-  //       this.status += "<br><br>~complete";
-  //     }
-  //     );
-  // }
 
   showToast(msg) {
     const toast = this.toastCtrl.create({
@@ -218,7 +194,7 @@ export class HotspotPage {
       );
   }
 
-  enableQuickSwitchOnMode(){
+  enableQuickSwitchOnMode() {
     this.http.get("http://" + this.ip + "/quickSwitchOn?state=true")
       .subscribe((observer) => {
         this.object = observer;
@@ -232,7 +208,7 @@ export class HotspotPage {
       );
   }
 
-  disableQuickSwitchOnMode(){
+  disableQuickSwitchOnMode() {
     this.http.get("http://" + this.ip + "/quickSwitchOn?state=false")
       .subscribe((observer) => {
         this.object = observer;
@@ -245,5 +221,4 @@ export class HotspotPage {
       }
       );
   }
-
 }

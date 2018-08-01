@@ -86,7 +86,6 @@ export class WiFiPage {
         this.status += "<br><br>~E~" + error;
         this.object = error;
       }, () => {
-        // this.status += "<br><br>~complete";
         let bulbArray = [];
         this.bulbs.forEach(bulb => {
           this.storage.getItem("bulbID-" + bulb.id).then((value) => {
@@ -120,15 +119,11 @@ export class WiFiPage {
 
     this.http.get("http://" + this.ip + "/changeBulbState?id=" + id + "&state=" + strState)
       .subscribe((observer) => {
-        // this.showToast("Successfully chnaged...");
         this.getDetails();
-
       }, (error) => {
         this.status += "<br><br>~E~" + error;
         this.object = error;
-      }, () => {
-        // this.status += "<br><br>~complete";
-      }
+      }, () => { }
       );
   }
 
@@ -143,22 +138,16 @@ export class WiFiPage {
 
         this.http.get("http://" + this.ip + "/setIntensity?id=" + id + "&intensity=" + intensity + "&isOn=" + strState)
           .subscribe((observer) => {
-            // this.showToast("Successfully chnaged...");
             this.directSwitch(id, state);
-
           }, (error) => {
             this.status += "<br><br>~E~" + error;
             this.object = error;
-          }, () => {
-            // this.status += "<br><br>~complete";
-          }
+          }, () => { }
           );
       }, (error) => {
         this.status += "<br><br>~E~" + error;
         this.object = error;
-      }, () => {
-        // this.status += "<br><br>~complete";
-      }
+      }, () => { }
       );
   }
 
@@ -202,23 +191,21 @@ export class WiFiPage {
     }
   }
   hideShowPassword() {
-
     this.passwordType = this.passwordType === 'text' ? 'password' : 'text';
     this.passwordIcon = this.passwordIcon === 'eye-off' ? 'eye' : 'eye-off';
-
-
   }
+
   hideShowPassword1() {
     this.passwordType1 = this.passwordType1 === 'text' ? 'password' : 'text';
     this.passwordIcon1 = this.passwordIcon1 === 'eye-off' ? 'eye' : 'eye-off';
   }
+
   getItems(ev: any) {
     var val = ev.target.value;
-    console.log(val);
   }
+
   showAlert(Title, Mess) {
     const alert = this.alertCtrl.create({
-
       title: Title,
       subTitle: Mess,
       buttons: ['OK']
@@ -233,6 +220,7 @@ export class WiFiPage {
     });
     toast.present();
   }
+
   changepass() {
     this.change = true;
   }

@@ -27,6 +27,4 @@ export class HomePage {
   pushWiFiPage() {
     return WiFiPage;
   }
-
-
 }
